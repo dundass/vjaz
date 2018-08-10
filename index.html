@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vjaz // livecoding p5.js // dundass</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.14/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.14/addons/p5.sound.js"></script>
+    <script src="../lib/socket.io.js"></script>
+    <!-- <script src="js/vjaz.js"></script> -->
+    <script src="https://rawgit.com/dundass/itera/master/itera.js"></script>
+    <link rel="stylesheet" href="../../css/vjaz.css" />
+    <script src="codemirror/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+    <script src="codemirror/mode/javascript/javascript.js"></script>
+	<script src="../ctlenter.js"></script>
+	<script src="plive.js"></script>
+	<script src="https://unpkg.com/vue"></script>
+	<script>
+	
+		plive.init();
+		
+		var app;
+		
+		function init() {
+			app = new Vue({
+				el: '#wrapper',
+				data: {
+					code: 'v0 = function() {\n background(0);\n}',
+					error: undefined
+				},
+				methods: {
+					keyDown: function(e) {
+						ctlenter.keydown(e.keyCode);
+						if(ctlenter.isPressed()) this.error = plive.evaluate(this.code);
+					},
+					keyUp: function(e) {
+						ctlenter.keyup(e.keyCode);
+					}
+				}
+			});
+		}
+		
+	</script>
+
+  </head>
+
+  <body onload="init()">
+  
+  <div id="wrapper">
+	  <textarea v-model="code" v-on:keydown="keyDown" id="codearea" rows="20" cols="60" autofocus></textarea>
+	  <div class="errorbox" v-bind:class="{ 'error': error !== undefined }">{{ error }}</div>
+  </div>
+
+  </body>
+</html>
