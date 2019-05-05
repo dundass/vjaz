@@ -2,7 +2,27 @@ var plive = plive || {};
 
 (function(pl) {
 	
-  // try CodeMirror for editor - or is this decoupled from view ?
+  /* 
+  
+  v0.push().translate(i/20).rotate(f).stroke(255, i, 20).point(i%8, i/8).pop()
+  
+  var v0 = {}
+  
+  v0.push = function () {
+	  push();
+	  return this;
+  }
+  
+  iterate thru p5 global api copying each key over to the wrapper func on the (p)layer objects:
+  
+  for(func in plive) {
+	  v0[func] = function() {
+		  if(typeof window[func] === function) v0[func](); // else console.warn(). hang on, what about the arguments ??
+		  return this;
+	  }
+  }
+  
+  */
   
   var textArea, codeMirror, sock;
 	
@@ -19,15 +39,26 @@ var plive = plive || {};
 	}
 	
 	function _createHelpers() {
+		
+		// p5
+		
 		window.fade = function(level) {
+			push();
 			noStroke();
 			fill(0, level);
 			rectMode(CORNER);
 			rect(0, 0, w, h);
+			pop();
 		}
-	}
-	
-	function _createSocketHelpers() {
+		
+		// utility
+		
+		window.iter = function(numTimes, action) {
+			for(var i = 0; i < numTimes; i++) action(i);
+		}
+		
+		// socket
+		
 		var receiveRemote = function(port) {
 			document.getElementById('codearea').style.visibility = "hidden";
 			sock = io.connect('http://localhost:' + port);
@@ -44,7 +75,9 @@ var plive = plive || {};
 		p5.disableFriendlyErrors = true;
 		
 		window.setup = function() {
-			createCanvas(w, h);
+			var renderer = createCanvas(w, h);
+			window.mainCanvas = renderer;
+			//console.log(renderer)
 			document.documentElement.style.overflow = 'hidden';
 			background(0);
 			textArea = document.getElementById("codearea");
@@ -85,7 +118,6 @@ var plive = plive || {};
 	pl.init = function() {
 		_createGlobals();
 		_createHelpers();
-		_createSocketHelpers();
 		_configureP5();
 	}
 	

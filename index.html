@@ -8,10 +8,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/p5.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.1/addons/p5.sound.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/dundass/itera@master/itera.js"></script>
+	<!-- <script src="../lib/vendor/p5.js"></script> -->
+	<!-- <script src="../lib/vendor/p5.sound.js"></script> -->
 	<!-- <script src="../lib/vendor/socket.io.js"></script> -->
-    <!-- <script src="js/vjaz.js"></script> -->
-    <script src="https://rawgit.com/dundass/itera/master/itera.js"></script>
 	<!-- <script src="../lib/itera/itera.js"></script> -->
+	
+    <!-- <script src="js/vjaz.js"></script> why did i have a link to this ? -->
     <style>
 		textarea {
 		  outline: none;
@@ -25,6 +28,23 @@
 		  /* has trouble on FF */
 		  white-space: nowrap;
 		  font-size: 2em;
+		}
+		.CodeMirror {
+			padding: 1%;
+		    background: rgba(255,255,255,0) !important;
+			font-size: 2em !important;
+			/*height: auto !important;*/
+			height: 100% !important;
+		}
+		.CodeMirror-hscrollbar {
+			display: none;
+		}
+		.vue-codemirror {
+			position: absolute;
+		    left: 5%;
+		    top: 5%;
+			width: 90%;
+			height: 90%;
 		}
 		canvas, body {
 		  border: 0 none;
@@ -49,13 +69,20 @@
 			background-color: rgba(255,0,0,0.5);
 		}
 	</style>
-    <script src="codemirror/lib/codemirror.js"></script>
+    <!--<script src="codemirror/lib/codemirror.js"></script>
     <link rel="stylesheet" href="codemirror/lib/codemirror.css">
-    <script src="codemirror/mode/javascript/javascript.js"></script>
-	<script src="https://rawgit.com/dundass/js-utils/master/ctlenter.js"></script>
-	<!-- <script src="../utils/ctlenter.js"></script> -->
+    <script src="codemirror/mode/javascript/javascript.js"></script>-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/mode/javascript/javascript.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/addon/selection/active-line.min.js"></script>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/theme/monokai.min.css" rel="stylesheet">
+	
+	<script src="https://cdn.jsdelivr.net/gh/dundass/js-utils@master/ctlenter.js"></script>
+	<!--<script src="../utils/ctlenter.js"></script>-->
 	<script src="plive.js"></script>
 	<script src="https://unpkg.com/vue"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue-codemirror@4.0.0/dist/vue-codemirror.js"></script>
 	<!-- <script src="../lib/vendor/vue.js"></script> -->
 	<script>
 	
@@ -64,16 +91,31 @@
 		var vij;
 		
 		function init() {
+			Vue.use(VueCodemirror);
 			vij = new Vue({
 				el: '#wrapper',
 				data: {
-					code: 'v0 = function() {\n background(0);\n}',
+					cmOption: {
+						tabSize: 4,
+						styleActiveLine: true,
+						lineNumbers: false,
+						mode: 'text/javascript',
+						theme: 'monokai'
+					},
+					code: 'v0 = function() {\n\tbackground(0);\n}',
 					error: undefined
 				},
 				methods: {
 					keyDown: function(e) {
 						ctlenter.keydown(e.keyCode);
 						if(ctlenter.isPressed()) this.error = plive.evaluate(this.code);
+						/*var txt = document.getElementById('codearea');
+						if(e.keyCode === 9 && e.target === txt) {
+							e.preventDefault();
+							var sel = txt.selectionStart;
+							this.code = this.code.substr(0, txt.selectionStart) + '\t' + this.code.substr(txt.selectionStart);
+							setTimeout(function() {txt.selectionStart = sel + 1; txt.selectionEnd = sel + 1}, 10);
+						}*/
 					},
 					keyUp: function(e) {
 						ctlenter.keyup(e.keyCode);
@@ -88,9 +130,10 @@
 
   <body onload="init()">
   
-  <div id="wrapper">
-	  <textarea v-model="code" v-on:keydown="keyDown" id="codearea" rows="20" cols="60" autofocus></textarea>
-	  <div class="errorbox" v-bind:class="{ 'error': error !== undefined }">{{ error }}</div>
+  <div id="wrapper" @keydown="keyDown">
+	  <!--<textarea v-model="code" @keydown="keyDown" id="codearea" rows="20" cols="60" autofocus></textarea>-->
+	  <codemirror v-model="code" :options="cmOption"></codemirror>
+	  <div class="errorbox" :class="{ 'error': error !== undefined }">{{ error }}</div>
   </div>
 
   </body>
