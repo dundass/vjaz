@@ -33,7 +33,8 @@ var plive = plive || {};
 		window.t = 0;
 		window.a = window.b = window.c = window.d = window.e = window.g = window.i = window.j = window.k = undefined;
 		for(var i = 0; i < 10; i++) {
-			window['v'+i] = function() {};
+			window['d'+i] = function() {};
+			window['v'+i] = { id: i, pipe: [] };
 		}
 		window.mic = undefined;
 	}
@@ -41,6 +42,10 @@ var plive = plive || {};
 	function _createHelpers() {
 		
 		// p5
+		
+		window.bg = function() {
+			background(...arguments);
+		};
 		
 		window.fade = function(level) {
 			push();
@@ -71,6 +76,41 @@ var plive = plive || {};
 		}
 	}
 	
+	function _buildChainables() {
+		
+		var p5funcs = [
+			'background', 'bg', 'fade', 'blendMode',
+			'stroke', 'noStroke', 'fill', 'noFill', 'tint', 'noTint',
+			'strokeWeight', 'strokeCap', 'strokeJoin',
+			'push', 'pop', 'translate', 'rotate', 'scale',
+			'point', 'line', 'triangle', 'rect', 'square', 'quad', 'ellipse', 'circle', 'arc', 'bezier', 'curve', 'beginShape', 'vertex', 'endShape', 
+			'image', 'text', 
+			'loadPixels', 'updatePixels', 'get', 'set',
+			'rectMode', 'ellipseMode', 'imageMode',
+		];
+		
+		for(var i = 0; i < 10; i++) {
+			for(var f = 0; f < p5funcs.length; f++) {
+				//if(typeof window[p5funcs[f]] === 'function') {
+					(function(func) {
+						window['v'+i][func] = function () {
+							//p5funcs[f](...arguments);
+							this.pipe.push({
+								func: func,
+								args: arguments
+							});
+							return this;
+						}.bind(window['v'+i]);
+					})(p5funcs[f]);
+				//}
+				//else {
+				//	console.warn('couldnt add ' + p5funcs[f] + ' to chainable objects !');
+				//}
+			}
+		}
+		
+	}
+	
 	function _configureP5() {
 		p5.disableFriendlyErrors = true;
 		
@@ -91,18 +131,31 @@ var plive = plive || {};
 
 			mic = new p5.AudioIn();
 
-			mic.start();
+			//mic.start();
 		}
 		
 		window.draw = function() {
+			var i, j, funcName, funcArgs;
+			
 			f = window.frameCount;
 			t = performance.now() * 1000;
-			for(var i = 0; i < 10; i++) {
+			for(i = 0; i < 10; i++) {
+				
 				try {
-					window['v'+i]();
+					window['d'+i]();
 				} catch(e) {
 					console.log(e.message);
 				}
+				
+				push();
+				
+				for(j = 0; j < window['v'+i].pipe.length; j++) {
+					funcName = window['v'+i].pipe[j].func;
+					funcArgs = window['v'+i].pipe[j].args;
+					window[funcName](...funcArgs);
+				}
+				
+				pop();
 			}
 		}
 		
@@ -118,15 +171,17 @@ var plive = plive || {};
 	pl.init = function() {
 		_createGlobals();
 		_createHelpers();
+		_buildChainables();
 		_configureP5();
 	}
 	
 	pl.evaluate = function(s) {
+		for(var i = 0; i < 10; i++) while(window['v'+i].pipe.length) window['v'+i].pipe.pop();
 		// look for double newlines, only eval the current set of lines
 		// lines = txtEl.value.split(/\n\s*\n/)
 		try {
 			eval(s);
-			// also test the new vals of the global vX funcs
+			// also test the new vals of the global dX funcs
 		} catch(e) {
 		  console.log(e.message);
 		  return e.message;
