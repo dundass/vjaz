@@ -58,10 +58,30 @@ var plive = plive || {};
 			pop();
 		}
 		
+		window.flipX = function() {
+			//push();
+			translate(width, 0);
+			scale(-1, 1);
+			//pop();
+		}
+		
+		window.flipY = function() {
+			//push();
+			translate(0, height);
+			scale(1, -1);
+			//pop();
+		}
+		
 		// utility
 		
 		window.iter = function(numTimes, action) {
 			for(var i = 0; i < numTimes; i++) action(i);
+		}
+		
+		window.every = function(numFrames, action) {
+			// action as func ?
+			// make part of chain and remove action arg (affects whole chain) ?
+			if(frameCount % numFrames === 0) action();
 		}
 		
 		// socket
@@ -81,14 +101,15 @@ var plive = plive || {};
 	function _buildChainables() {
 		
 		var p5funcs = [
-			'background', 'bg', 'fade', 'blendMode',
+			'background', 'bg', 'fade', 
 			'stroke', 'noStroke', 'fill', 'noFill', 'tint', 'noTint',
 			'strokeWeight', 'strokeCap', 'strokeJoin',
-			'push', 'pop', 'translate', 'rotate', 'scale',
+			'push', 'pop', 'translate', 'rotate', 'scale', 'flipX', 'flipY',
 			'point', 'line', 'triangle', 'rect', 'square', 'quad', 'ellipse', 'circle', 'arc', 'bezier', 'curve', 'beginShape', 'vertex', 'endShape', 
 			'image', 'text', 
-			'loadPixels', 'updatePixels', 'get', 'set', 'filter',
+			'loadPixels', 'updatePixels', 'get', 'set', 'filter', 'blendMode',
 			'rectMode', 'ellipseMode', 'imageMode',
+			'iter', 'every',
 		];
 		
 		for(var i = 0; i < 10; i++) {
