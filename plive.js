@@ -25,6 +25,8 @@ var plive = plive || {};
   */
   
   var textArea, codeMirror, sock;
+  
+  var codeString = '';
 	
 	function _createGlobals() {
 		window.w = window.innerWidth;
@@ -85,7 +87,7 @@ var plive = plive || {};
 			'push', 'pop', 'translate', 'rotate', 'scale',
 			'point', 'line', 'triangle', 'rect', 'square', 'quad', 'ellipse', 'circle', 'arc', 'bezier', 'curve', 'beginShape', 'vertex', 'endShape', 
 			'image', 'text', 
-			'loadPixels', 'updatePixels', 'get', 'set',
+			'loadPixels', 'updatePixels', 'get', 'set', 'filter',
 			'rectMode', 'ellipseMode', 'imageMode',
 		];
 		
@@ -94,11 +96,11 @@ var plive = plive || {};
 				//if(typeof window[p5funcs[f]] === 'function') {
 					(function(func) {
 						window['v'+i][func] = function () {
-							//p5funcs[f](...arguments);
-							this.pipe.push({
+							window[func](...arguments);
+							/*this.pipe.push({
 								func: func,
 								args: arguments
-							});
+							});*/
 							return this;
 						}.bind(window['v'+i]);
 					})(p5funcs[f]);
@@ -147,7 +149,7 @@ var plive = plive || {};
 					console.log(e.message);
 				}
 				
-				push();
+				/*push();
 				
 				for(j = 0; j < window['v'+i].pipe.length; j++) {
 					funcName = window['v'+i].pipe[j].func;
@@ -155,8 +157,10 @@ var plive = plive || {};
 					window[funcName](...funcArgs);
 				}
 				
-				pop();
+				pop();*/
 			}
+			
+			eval(codeString);
 		}
 		
 		window.keyPressed = function() {
@@ -176,6 +180,8 @@ var plive = plive || {};
 	}
 	
 	pl.evaluate = function(s) {
+		codeString = s;
+		return;
 		for(var i = 0; i < 10; i++) while(window['v'+i].pipe.length) window['v'+i].pipe.pop();
 		// look for double newlines, only eval the current set of lines
 		// lines = txtEl.value.split(/\n\s*\n/)

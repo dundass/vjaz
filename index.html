@@ -39,6 +39,12 @@
 		.CodeMirror-hscrollbar {
 			display: none;
 		}
+		.CodeMirror-line > span {
+			background-color: rgba(0,0,0,0.4);
+		}
+		.CodeMirror-activeline-background {
+			background-color: rgba(0,0,0,0.5) !important;
+		}
 		.vue-codemirror {
 			position: absolute;
 		    left: 5%;
@@ -67,6 +73,16 @@
 		}
 		.errorbox.error {
 			background-color: rgba(255,0,0,0.5);
+		}
+		::-webkit-scrollbar {
+		  width: 12px;  /* for vertical scrollbars */
+		  height: 12px; /* for horizontal scrollbars */
+		}
+		::-webkit-scrollbar-track {
+		  background: rgba(0, 0, 0, 0.1);
+		}
+		::-webkit-scrollbar-thumb {
+		  background: rgba(0, 0, 0, 0.5);
 		}
 	</style>
     <!--<script src="codemirror/lib/codemirror.js"></script>
