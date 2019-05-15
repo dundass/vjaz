@@ -2,25 +2,31 @@ var plive = plive || {};
 
 (function(pl) {
 	
+	// TODO - webpack
+	
   /* 
   
-  v0.push().translate(i/20).rotate(f).stroke(255, i, 20).point(i%8, i/8).pop()
+  maybe:
   
-  var v0 = {}
+  var globalPipeline = [];	// make sure to reset on ctrlenter
   
-  v0.push = function () {
-	  push();
-	  return this;
+  v0 = () => {
+	  var obj = createGraphics(w, h);
+	  globalPipeline.push(obj);
+	  return obj;
   }
   
-  iterate thru p5 global api copying each key over to the wrapper func on the (p)layer objects:
+  // in text buffer:
   
-  for(func in plive) {
-	  v0[func] = function() {
-		  if(typeof window[func] === function) v0[func](); // else console.warn(). hang on, what about the arguments ??
-		  return this;
-	  }
-  }
+  v0().stroke(200).line(a, b, c, d)
+  
+  // in internal draw:
+  
+  for(gfx in globalPipeline) image(gfx, 0, 0, w, h);
+  
+  // issues:
+  
+  - if using createGraphics, might have to use beginDraw and endDraw - actually doesn't seem to be the case ?
   
   */
   
@@ -48,6 +54,14 @@ var plive = plive || {};
 		window.bg = function() {
 			background(...arguments);
 		};
+		
+		window.weight = function() {
+			strokeWeight(...arguments);
+		}
+		
+		window.blend = function() {
+			blendMode(...arguments);
+		}
 		
 		window.fade = function(level) {
 			push();
@@ -103,11 +117,11 @@ var plive = plive || {};
 		var p5funcs = [
 			'background', 'bg', 'fade', 
 			'stroke', 'noStroke', 'fill', 'noFill', 'tint', 'noTint',
-			'strokeWeight', 'strokeCap', 'strokeJoin',
+			'weight', 'strokeWeight', 'strokeCap', 'strokeJoin',
 			'push', 'pop', 'translate', 'rotate', 'scale', 'flipX', 'flipY',
 			'point', 'line', 'triangle', 'rect', 'square', 'quad', 'ellipse', 'circle', 'arc', 'bezier', 'curve', 'beginShape', 'vertex', 'endShape', 
 			'image', 'text', 
-			'loadPixels', 'updatePixels', 'get', 'set', 'filter', 'blendMode',
+			'loadPixels', 'updatePixels', 'get', 'set', 'filter', 'blendMode', 'blend',
 			'rectMode', 'ellipseMode', 'imageMode',
 			'iter', 'every',
 		];
@@ -131,6 +145,10 @@ var plive = plive || {};
 				//}
 			}
 		}
+		
+		// modify p5 api
+		
+		// set context-sensible defaults, eg image(img) same as image(img, 0, 0, w, h) 
 		
 	}
 	
