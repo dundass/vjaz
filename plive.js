@@ -4,15 +4,13 @@ var plive = plive || {};
 	
 	// TODO - webpack
 	
+	// TODO - integrate p5.SVG + make custom pattern() func based on svg.js or similar api
+	
 	// regex to get func params in a string - /[^(\)]+(?=\))/g
 	
   /* 
   
-  createGraphics approach issues:
-  
-  - still doesn't solve using eg f in func args, so have to eval entire codeString every frame
-  
-  - how to extend the vanilla pgraphics obj with additional funcs ?
+  - how to solve issue of using eg f in func args ? currently have to eval entire codeString every frame
   
   */
   
@@ -21,6 +19,8 @@ var plive = plive || {};
   var codeString = '';
   
   var globalPipeline = [];
+  
+  var numBuffers = 8;
 	
 	function _createGlobals() {
 		window.w = window.innerWidth;
@@ -77,7 +77,7 @@ var plive = plive || {};
 		// utility
 		
 		window.many = function(numTimes, action) {
-			for(var i = 0; i < numTimes; i++) action(i);
+			for(var i = 0; i < numTimes; i++) action(i, numTimes);
 		}
 		
 		window.every = function(numFrames, action) {
@@ -85,6 +85,14 @@ var plive = plive || {};
 			// make part of chain and remove action arg (affects whole chain) ?
 			if(frameCount % numFrames === 0) action();
 		}
+		
+		window.once = (function() {
+			var hasBeenCalled = false;
+			return function(action) {
+				if(!hasBeenCalled) action();
+				hasBeenCalled = true;
+			}
+		})();
 		
 		// socket
 		
@@ -142,6 +150,8 @@ var plive = plive || {};
 		
 		// --- end old section ---
 		
+		// --- begin new section --- http://zenozeng.github.io/p5.js-svg/doc/reference/rendering.js.html#line67
+		
 		// extend p5 funcs that aren't chainable
 		// TODO - separate into simple extensions (eg tint, can loop thru) and custom eg image()
 		
@@ -163,13 +173,13 @@ var plive = plive || {};
 		
 		var _pop = p5.prototype.pop;
 		p5.prototype.pop = function () {
-			_pop.apply(this, arguments);
+			_pop.apply(this);
 			return this;
 		}
 		
 		var _push = p5.prototype.push;
 		p5.prototype.push = function () {
-			_push.apply(this, arguments);
+			_push.apply(this);
 			return this;
 		}
 		
@@ -231,7 +241,7 @@ var plive = plive || {};
 			//   mode:  "javascript"
 			// });
 			
-			for(var i = 0; i < 10; i++) {
+			for(var i = 0; i < numBuffers; i++) {
 				window['v'+i] = (function() {
 					var obj = createGraphics(w, h);
 					return function() {
